@@ -12,7 +12,8 @@ names(df.harmf)
 
 ragg <- aggregate(FATALITIES ~ EVTYPE, data = df.harmf, sum)
 class(ragg)
-sort(r$FATALITIES, decreasing = TRUE)[1:10]
+
+sort(ragg$FATALITIES, decreasing = TRUE)[1:10]
 
 rgb <- df.harmf %>% group_by(EVTYPE) %>%
     summarise(sum_fatalities = sum(FATALITIES), sum_injuries = sum(INJURIES)) %>%
@@ -44,9 +45,34 @@ ggplot(rs, aes(reorder(EVTYPE, value), value)) +
     geom_col(aes(fill = variable)) +
     coord_flip()
 
-#library(dplyr)
-#df2 <- df %>%
-#    group_by(dose) %>%
-#    arrange(dose, desc(supp)) %>%
-#    mutate(lab_ypos = cumsum(len) - 0.5 * len) 
-#df2
+head(top10Harm)
+
+
+
+library(lubridate)
+head(df.harmf)
+df.harmf$year <- year(df.harmf$BGN_DATE)
+
+kY <- df.harmf %>% 
+    group_by(year) %>%
+    summarise(sf = sum(FATALITIES), 
+              si = sum(INJURIES), 
+              st = sum(FATALITIES) + sum(INJURIES))
+
+kYE <- df.harmf %>% 
+    group_by(year, EVTYPE) %>%
+    summarise(sf = sum(FATALITIES), 
+              si = sum(INJURIES), 
+              st = sum(FATALITIES) + sum(INJURIES))
+
+head(kYE)
+kYE_tornado <- as.data.frame(kYE[kYE$EVTYPE == "Tornado",])
+
+kYE_tornado_plot <- melt(kYE_tornado[,c("year", "sf", "si", "st")], id.vars = 1)
+
+head(kYE_tornado_plot)
+
+windows()
+ggplot(kYE_tornado_plot, aes(year,value, color = variable)) +
+    geom_line()
+    
