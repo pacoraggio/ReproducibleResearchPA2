@@ -74,7 +74,4 @@ df.wdata$PROPDMGCONV <- sapply(df.wdata$PROPDMGEXP, convert.exp) *
 df.wdata$CROPDMGCONV <- sapply(df.wdata$CROPDMGEXP, convert.exp) *
     df.wdata$CROPDMG 
 
-df.wdata$PROPDMGEXP[12500:12525]
-df.wdata$PROPDMG[12500:12525]
-df.wdata$PROPDMGCONV[12500:12525]
-
+save(df.wdata, file = "workingdata.RData")
