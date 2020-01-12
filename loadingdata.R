@@ -77,3 +77,4 @@ df.wdata$CROPDMGCONV <- sapply(df.wdata$CROPDMGEXP, convert.exp) *
 df.wdata$PROPDMGEXP[12500:12525]
 df.wdata$PROPDMG[12500:12525]
 df.wdata$PROPDMGCONV[12500:12525]
+
