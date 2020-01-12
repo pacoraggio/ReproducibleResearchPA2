@@ -21,12 +21,13 @@ head(df.costdam)
 
 df.costplot <- df.costdam %>% group_by(EVTYPE) %>%
     summarise(cropdmg = sum(CROPDMGCONV), 
-              propdmg = sum(PROPDMGCONV)) %>%
+              propdmg = sum(PROPDMGCONV),
+              year = year(BGN_DATE)) %>%
     mutate(total_sum = cropdmg + propdmg)
 
 
 top10cost <- as.data.frame(df.costplot[order(df.costplot$total_sum, decreasing = TRUE)[1:10], ])
-top10cost
+head(top10cost)
 
 top10costplot <- melt(top10cost[,c("EVTYPE", "cropdmg","propdmg")], id.vars = 1)
 
