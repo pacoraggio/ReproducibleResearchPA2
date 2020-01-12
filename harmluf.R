@@ -1,10 +1,13 @@
 #1. Across the United States, which types of events (as indicated in the EVTYPE 
 #  variable) are most harmful with respect to population health?
+rm(list = ls())
+load("workingdata.RData")
+
 library(ggplot2)
 library(dplyr)
-    
-df.harmf <- df.test[df.test$FATALITIES != 0 | df.test$INJURIES != 0,]
-names(df.harmf)
+
+
+df.harmf <- df.wdata[df.wdata$FATALITIES != 0 | df.wdata$INJURIES != 0,]
 
 sum(df.harmf$FATALITIES)
 sum(df.harmf$INJURIES)
@@ -19,14 +22,9 @@ rgb <- df.harmf %>% group_by(EVTYPE) %>%
     summarise(sum_fatalities = sum(FATALITIES), sum_injuries = sum(INJURIES)) %>%
     mutate(total_sum = sum_fatalities + sum_injuries)
 
-head(rgb)
 
 top10Harm <- as.data.frame(rgb[order(rgb$total_sum, decreasing = TRUE)[1:10], ])
-ggplot(top10Harm, aes(EVTYPE, total_sum)) +
-    geom_bar(stat = "identity", aes(fill = sum_injuries)) +
-    coord_flip()
 
-rgb
 library(reshape)
 rs <- melt(top10Harm[,c("EVTYPE", "sum_fatalities","sum_injuries")], id.vars = 1)
 
@@ -47,32 +45,30 @@ ggplot(rs, aes(reorder(EVTYPE, value), value)) +
 
 head(top10Harm)
 
-
-
 library(lubridate)
 head(df.harmf)
-df.harmf$year <- year(df.harmf$BGN_DATE)
 
 kY <- df.harmf %>% 
-    group_by(year) %>%
+    group_by(YEAR) %>%
     summarise(sf = sum(FATALITIES), 
               si = sum(INJURIES), 
               st = sum(FATALITIES) + sum(INJURIES))
 
 kYE <- df.harmf %>% 
-    group_by(year, EVTYPE) %>%
+    group_by(YEAR, EVTYPE) %>%
     summarise(sf = sum(FATALITIES), 
               si = sum(INJURIES), 
               st = sum(FATALITIES) + sum(INJURIES))
 
 head(kYE)
-kYE_tornado <- as.data.frame(kYE[kYE$EVTYPE == "Tornado",])
+#kYE_tornado <- as.data.frame(kYE[kYE$EVTYPE == "Tornado",])
+kYE_tornado <- as.data.frame(kYE[kYE$EVTYPE == "TORNADO",])
 
-kYE_tornado_plot <- melt(kYE_tornado[,c("year", "sf", "si", "st")], id.vars = 1)
+kYE_tornado_plot <- melt(kYE_tornado[,c("YEAR", "sf", "si", "st")], id.vars = 1)
 
 head(kYE_tornado_plot)
 
 windows()
-ggplot(kYE_tornado_plot, aes(year,value, color = variable)) +
+ggplot(kYE_tornado_plot, aes(YEAR,value, color = variable)) +
     geom_line()
     
