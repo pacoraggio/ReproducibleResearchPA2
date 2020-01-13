@@ -13,6 +13,10 @@ library(dplyr)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## Synopsis
+
+
+
 ## Data Processing
 
 The raw data file is more than 500Mb and so it would be beneficial if we could load only the information we consider necessary for answering the the proposed questions.
