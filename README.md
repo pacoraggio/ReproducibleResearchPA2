@@ -5,6 +5,14 @@ Private repo for the Coursera Reproducible Research Project Assignment #2
 ## Description of the different scripts\\files
 
 - loadingdata.R load and pre process the raw data
+- harmful.R 
+    - extract information from pre processed raw data about Fatalities and Injuries grouped by Event Type
+    - sort the top 10 most harmfule Event Type 
+    - plot Fatalities and Injuries
+- costdamage.R 
+    - extract information from pre processed raw data about economical damages to Properties and Crop grouped by Event Type
+    - sort the top 10 most costly Event Type 
+    - plot Prop and Crop costs
 - DataProcessing.Rmd notes on how the raw data have been loaded and processed
 
 ## Description of overall pipeline
