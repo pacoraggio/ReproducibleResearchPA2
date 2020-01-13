@@ -1,3 +1,9 @@
+# 2. Across the United States, which types of events have the greatest economic 
+# consequences?
+
+# To address this question I am considering the reported economical damages 
+# (CROPDMGCONV and PROPDMGCONV variables of the dataset). 
+
 rm(list = ls())
 load("workingdata.RData")
 
