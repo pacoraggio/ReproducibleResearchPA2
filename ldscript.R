@@ -132,7 +132,7 @@ df.test[grep("spout",df.test$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Waterspout
 df.test[grep("slide",df.test$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Avalanche"
 
 
-length(unique(df.test$EVTYPE))
+length(unique(df.test$EVTYPE))x
 r <- unique(df.test$EVTYPE)
 sort(r[r != toupper(r)])
 sort(unique(varnames))
