@@ -47,7 +47,6 @@ ggplot(df.top10Harmplot, aes(reorder(EVTYPE, value), value)) +
 head(top10Harm)
 
 library(lubridate)
-head(df.harmf)
 
 ## from 1995
 
