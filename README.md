@@ -13,6 +13,8 @@ Private repo for the Coursera Reproducible Research Project Assignment #2
     - extract information from pre processed raw data about economical damages to Properties and Crop grouped by Event Type
     - sort the top 10 most costly Event Type 
     - plot Prop and Crop costs
+- ldscript.R is an old script with different approach on how to load the data
+- spatialdata.R script containing approach to plot data based on US states (on a geographical map) 
 - DataProcessing.Rmd notes on how the raw data have been loaded and processed
 
 ## Description of overall pipeline
