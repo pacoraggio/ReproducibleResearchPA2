@@ -1,37 +1,43 @@
+rm(list = ls())
+load("workingdata.RData")
+
 library(ggplot2)
 library(dplyr)
 library(reshape)
 library(lubridate)
 
-df.test <- df.rawdata
-length(unique(df.test$EVTYPE))
+length(unique(df.wdata$EVTYPE))
 
+sum(df.wdata$CROPDMGCONV) 
+sum(df.wdata$PROPDMGCONV)
 
-df.costdam <- df.test[df.test$PROPDMGCONV != 0 | df.test$CROPDMGCONV != 0,] 
-sum(df.costdam$CROPDMGCONV) 
-sum(df.costdam$PROPDMGCONV)
-
-sum(df.test$CROPDMGCONV)
-sum(df.test$PROPDMGCONV)
-
-sum(df.costdam$CROPDMGCONV) == sum(df.test$CROPDMGCONV) 
-sum(df.costdam$PROPDMGCONV) == sum(df.test$PROPDMGCONV)
-
-head(df.costdam)
-
-df.costplot <- df.costdam %>% group_by(EVTYPE) %>%
+df.cost <- df.wdata %>% group_by(EVTYPE) %>%
     summarise(cropdmg = sum(CROPDMGCONV), 
-              propdmg = sum(PROPDMGCONV),
-              year = year(BGN_DATE)) %>%
+              propdmg = sum(PROPDMGCONV)) %>%
     mutate(total_sum = cropdmg + propdmg)
 
+head(df.cost)
 
-top10cost <- as.data.frame(df.costplot[order(df.costplot$total_sum, decreasing = TRUE)[1:10], ])
-head(top10cost)
+df.top10PROPcost <- as.data.frame(df.cost[order(df.cost$propdmg, 
+                                            decreasing = TRUE)[1:10], ])
 
-top10costplot <- melt(top10cost[,c("EVTYPE", "cropdmg","propdmg")], id.vars = 1)
+df.top10CROPcost <- as.data.frame(df.cost[order(df.cost$cropdmg, 
+                                            decreasing = TRUE)[1:10], ])
 
-library(ggplot2)
+
+top10costPROPplot <- melt(df.top10cost[,c("EVTYPE", "propdmg")], id.vars = 1)
+top10costCROPplot <- melt(df.top10cost[,c("EVTYPE", "cropdmg")], id.vars = 1)
+top10costplot <- melt(df.top10cost[,c("EVTYPE", "cropdmg","propdmg")], id.vars = 1)
+
+windows()
+ggplot(top10costPROPplot, aes(reorder(EVTYPE, value), value)) +
+    geom_col() +
+    coord_flip()
+
+windows()
+ggplot(top10costCROPplot, aes(reorder(EVTYPE, value), value)) +
+    geom_col() +
+    coord_flip()
 
 windows()
 ggplot(top10costplot, aes(reorder(EVTYPE, value), value)) +
