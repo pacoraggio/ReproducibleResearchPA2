@@ -31,28 +31,30 @@ In order to address these questions, the provided .csv file has been downloaded,
 
 ## Data Processing
 
-This section describes how the data has been loaded into R data structures for the data analysis. The original raw data file is a zipped ~50Mb file containing an about 500Mb database and so the strategy for saving computer space (and computing time) chosen for analysing the data is to load only the variable that are necessary for answering the roposed questions.
+This section describes how the data has been loaded into R data structures for the data analysis. The original raw data file is a zipped ~50Mb file containing an about 500Mb database and so the strategy for saving computer space (and computing time) chosen for analysing the data is to load only the variable that are necessary for answering the proposed questions.
 
 Extracting the first lines from the .csv file gives us information about the variable it contains
 
 ```{r varnames, message=FALSE, warning=FALSE}
-
-
-names <- read.csv("./Data/repdata_data_StormData.csv.bz2", 
-                  nrows = 10, header = TRUE)
-
+destfile <- "./Data/repdata_data_StormData.csv.bz2"
+if(!file.exists(destfile))
+{
+    dir.create("./Data")
+    destfile <- "./Data/repdata_data_StormData.csv.bz2"
+    urlziplocation <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
+    download.file(urlziplocation, destfile)
+    names <- read.csv(destfile, nrows = 1, header = TRUE)
+}else{
+    names <- read.csv(destfile, nrows = 1, header = TRUE)
+}
 knitr::kable(str(names))
 ```
 
+The database contains $37$ variables, in order to address the questions, the following $9$ variables are extracted from the .csv file.
 
-The database contains $37$ variables, in order to address the questions, the following 12 variables are extracted from the .csv file (all rows included)
-
-- "STATE__"    
 - "BGN_DATE"   
 - "STATE"      
 - "EVTYPE"     
-- "F"          
-- "MAG"       
 - "FATALITIES" 
 - "INJURIES"   
 - "PROPDMG"    
@@ -60,39 +62,75 @@ The database contains $37$ variables, in order to address the questions, the fol
 - "CROPDMG"    
 - "CROPDMGEXP"
 
-With `F` and `MAG` variably possibly redundant. 
-
 ```{r loadingraw}
 df.rawdata <- read.csv("./Data/repdata_data_StormData.csv.bz2",
-                    colClasses = c("character", 
-                                   "character", 
-                                   rep("NULL",4), 
-                                   rep("character",2),
-                                   rep("NULL",12),
-                                   "character","numeric",
-                                   rep("numeric",3),
-                                   "character", 
-                                   "numeric", 
-                                   "character", 
-                                   rep("NULL",9)))
+                       colClasses = c("NULL", 
+                                      "character", 
+                                      rep("NULL",4), 
+                                      rep("character",2),
+                                      rep("NULL",14),
+                                      rep("numeric",3),
+                                      "character", 
+                                      "numeric", 
+                                      "character", 
+                                      rep("NULL",9)))
 
-knitr::kable(head(df.rawdata))
+head(df.rawdata, ncol = 3)
 ```
 
-After loading the raw data, the database is further reducing by considering raws where at least one fatality/injury/property or crop damage have been recorder.
+After loading the raw data, the database is further reduced by considering raws where at least one fatality/injury/property or crop damage have been recorder.
 
 ```{r reducedraw}
-df.rawdatared <- df.rawdata[!(df.rawdata$FATALITIES == 0 &
-                              df.rawdata$INJURIES == 0 &
-                              df.rawdata$PROPDMG == 0 &
-                              df.rawdata$CROPDMG == 0),]
-
-## convert Begin Date to Date format
-df.rawdatared$BGN_DATE <- as.Date(sub(" .*", "", df.rawdatared$BGN_DATE), format("%m/%d/%Y"))
+df.wdata <- df.rawdata[!(df.rawdata$FATALITIES == 0 &
+                             df.rawdata$INJURIES == 0 &
+                             df.rawdata$PROPDMG == 0 &
+                             df.rawdata$CROPDMG == 0),]
 ```
 
-In this way the original database consisting of $902297 \times 37$ values has been pruned into a more handable $254633 \times 12$ values database.
+In this way the original database consisting of $902297 \times 37$ values has been pruned into a more handable $254633 \times 9$ values database.
+
+### Creating the YEAR variable
+
+In order to process the data.frame based on the year the data were collected, a new YEAR variable is created from the original `BGN_DATE` variable
+
+```{r year}
+df.wdata$YEAR <- year(as.Date(sub(" .*", 
+                                  "", 
+                                  df.wdata$BGN_DATE), 
+                              format("%m/%d/%Y")))
+```
+
+### Computing Crop and Properties economical costs 
+
+The agriculturals and properties damage costs are stored in the `CROPDMG` and `PROPDMG` variable as numerical value and in `PROPDMGEXP` and `CROPDMGEXP` as exponent to consider for the related numerical value. The following function convert the recorded exponent to the right factor to multiply the cost value.
+
+```{r computeexponent, message=FALSE}
+convert.exp <- function(x)
+{
+    if(x == "B")
+        return(1000000000)
+    else if(x == "M" | x == "m")
+        return(1000000)
+    else if(x == "K" | x == "k")
+        return(1000)
+    else if(x == "H" | x == "h")
+        return(100)
+    return(1)
+}
+```
+
+Since I could not find the documentation about some exponent factor, I decided to set them to $1$. The function can be easily changed if further information is added. The new variables `PROPDMGCONV` and `CROPDMGCONV` contains the converted cost values. 
+
+```{r computevalue}
+df.wdata$PROPDMGCONV <- sapply(df.wdata$PROPDMGEXP, convert.exp) *
+    df.wdata$PROPDMG
+
+df.wdata$CROPDMGCONV <- sapply(df.wdata$CROPDMGEXP, convert.exp) *
+    df.wdata$CROPDMG 
+```
 
 ### Selecting and merging Event Type
 
-The [National Weather Service Storm Data Documentation](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf) document lists $48$ different event type (ref. section 2.1.1 for the Storm Data Event Table and Chapter 7 for event type description) while `EVTYPE` database variable contains `r length(unique(df.rawdatared$EVTYPE))` different values.  
+The [National Weather Service Storm Data Documentation](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf) document lists $48$ different event type (ref. section 2.1.1 for the Storm Data Event Table and Chapter 7 for event type description) while `EVTYPE` database variable contains `r length(unique(df.wdata$EVTYPE))` different values.  
+
+    
