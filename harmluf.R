@@ -62,7 +62,10 @@ head(df.casualties)
 df.top10Harm <- as.data.frame(df.casualties[order(df.casualties$sum_fatalities, 
                                                   decreasing = TRUE)[1:10], ])
 
+df.top10Harm <- as.data.frame(df.casualties[order(df.casualties$total_sum, 
+                                                  decreasing = TRUE)[1:10], ])
 
+head(df.top10Harm)
 df.top10Harmplot <- melt(df.top10Harm[,c("EVTYPE", 
                                          "sum_fatalities",
                                          "sum_injuries",
