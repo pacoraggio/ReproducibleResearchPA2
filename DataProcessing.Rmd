@@ -2,33 +2,48 @@
 title: "Data Processing notes"
 author: "Paolo Coraggio"
 date: "09/01/2020"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
-library(lubridate)
-library(ggplot2)
-library(dplyr)
+library(lubridate) 
+library(ggplot2) 
+library(dplyr) 
 
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Synopsis
 
+The National Oceanic and Atmospheric Administration (NOAA) is an US scientific agency that focuses on ["conditions of the oceans, major waterways, and atmosphere"](https://en.wikipedia.org/wiki/National_Oceanic_and_Atmospheric_Administration) which one of the main activity is "Monitoring and observing Earth systems with instruments and data collection networks". 
+The [Storm Event Database](https://www.ncdc.noaa.gov/stormevents/details.jsp) contains data from 1950 to date that tracks the caracteristics of major weather events including an estimates of any fatalities, injuries and property damage. 
 
+The goal of this project is to explore a subset of the Storm Event Database (from 1950 to 2011) to address the following questions:
+
+1. Across the United States, which types of events (as indicated in the EVTYPE 
+    variable) are most harmful with respect to population health?
+2. Across the United States, which types of events have the greatest economic 
+    consequences?
+
+In order to address these questions, the provided .csv file has been downloaded, explored and a selected number of variables has been loaded into a dataframe. The dataframe has been further processed in order to filter the event type describing the cause of casualties//damages and then computed the sums of casualties as well as for costs grouped by event type. Finally, the result are reported using plots and tables about the top 10 harmful and costly events.
 
 ## Data Processing
 
-The raw data file is more than 500Mb and so it would be beneficial if we could load only the information we consider necessary for answering the the proposed questions.
+This section describes how the data has been loaded into R data structures for the data analysis. The original raw data file is a zipped ~50Mb file containing an about 500Mb database and so the strategy for saving computer space (and computing time) chosen for analysing the data is to load only the variable that are necessary for answering the roposed questions.
 
 Extracting the first lines from the .csv file gives us information about the variable it contains
 
-```{r varnames}
-names <- read.csv("./data/repdata_data_StormData.csv/repdata_data_StormData.csv", 
+```{r varnames, message=FALSE, warning=FALSE}
+
+
+names <- read.csv("./Data/repdata_data_StormData.csv.bz2", 
                   nrows = 10, header = TRUE)
 
-knitr::kable(names[1:3,])
+knitr::kable(str(names))
 ```
+
 
 The database contains $37$ variables, in order to address the questions, the following 12 variables are extracted from the .csv file (all rows included)
 
@@ -48,7 +63,7 @@ The database contains $37$ variables, in order to address the questions, the fol
 With `F` and `MAG` variably possibly redundant. 
 
 ```{r loadingraw}
-df.rawdata <- read.csv("./data/repdata_data_StormData.csv.bz2",
+df.rawdata <- read.csv("./Data/repdata_data_StormData.csv.bz2",
                     colClasses = c("character", 
                                    "character", 
                                    rep("NULL",4), 
