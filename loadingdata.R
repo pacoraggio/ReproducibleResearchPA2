@@ -8,10 +8,7 @@ library(dplyr)
 library(ggplot2)
 library(lubridate)
 
-#  https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2
-
 destfile <- "./Data/repdata_data_StormData.csv.bz2"
-
 if(!file.exists(destfile))
 {
     dir.create("./Data")
@@ -52,7 +49,7 @@ df.wdata$YEAR <- year(as.Date(sub(" .*",
                                   df.wdata$BGN_DATE), 
                               format("%m/%d/%Y")))
 
-# head(df.wdata)
+head(df.wdata)
 
 dim(df.rawdata)
 dim(df.wdata)

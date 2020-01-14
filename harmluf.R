@@ -50,22 +50,40 @@ library(lubridate)
 
 ## from 1995
 
-t <- df.wdata[df.wdata$YEAR > 1995,]
-head(t)
+df.wdata <- df.wdata[df.wdata$YEAR > 1995,]
+head(df.wdata$YEAR)
 
-df.casualties <- df.wdata[df.wdata$YEAR > 1995,] %>% group_by(EVTYPE) %>%
-    summarise(sum_fatalities = sum(FATALITIES), sum_injuries = sum(INJURIES)) %>%
+
+df.casualties <- df.wdata[df.wdata$YEAR > 1995,] %>% 
+    group_by(EVTYPE) %>%
+    summarise(sum_fatalities = sum(FATALITIES), 
+              sum_injuries = sum(INJURIES)) %>%
     mutate(total_sum = sum_fatalities + sum_injuries)
 
 head(df.casualties)
 
-df.top10Harm <- as.data.frame(df.casualties[order(df.casualties$sum_fatalities, 
+df.top10sumfatalities <- 
+    as.data.frame(df.casualties[order(df.casualties$sum_fatalities, 
                                                   decreasing = TRUE)[1:10], ])
 
-df.top10Harm <- as.data.frame(df.casualties[order(df.casualties$total_sum, 
+df.top10suminjuries <- 
+    as.data.frame(df.casualties[order(df.casualties$sum_injuries, 
                                                   decreasing = TRUE)[1:10], ])
+
+df.top10total <- 
+    as.data.frame(df.casualties[order(df.casualties$total_sum, 
+                                      decreasing = TRUE)[1:10], ])
+
+
+resume <- data.frame('Event Type' = df.top10sumfatalities$EVTYPE,
+                     'Fatalities' = df.top10sumfatalities$sum_fatalities,
+                     'Event Type' = df.top10suminjuries$EVTYPE,
+                     'Injuries' = df.top10suminjuries$sum_injuries,
+                     'Event Type' = df.top10total$EVTYPE,
+                     'Total' = df.top10total$total_sum)
 
 head(df.top10Harm)
+
 df.top10Harmplot <- melt(df.top10Harm[,c("EVTYPE", 
                                          "sum_fatalities",
                                          "sum_injuries",

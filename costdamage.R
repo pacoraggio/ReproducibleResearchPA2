@@ -30,10 +30,16 @@ df.top10PROPcost <- as.data.frame(df.cost[order(df.cost$propdmg,
 df.top10CROPcost <- as.data.frame(df.cost[order(df.cost$cropdmg, 
                                             decreasing = TRUE)[1:10], ])
 
+df.top10cost <- as.data.frame(df.cost[order(df.cost$total_sum, 
+                                                decreasing = TRUE)[1:10], ])
 
 top10costPROPplot <- melt(df.top10cost[,c("EVTYPE", "propdmg")], id.vars = 1)
 top10costCROPplot <- melt(df.top10cost[,c("EVTYPE", "cropdmg")], id.vars = 1)
-top10costplot <- melt(df.top10cost[,c("EVTYPE", "cropdmg","propdmg")], id.vars = 1)
+
+top10costplot <- melt(df.top10cost[,c("EVTYPE", 
+                                      "cropdmg",
+                                      "propdmg",
+                                      "total_sum")], id.vars = 1)
 
 windows()
 ggplot(top10costPROPplot, aes(reorder(EVTYPE, value), value)) +
@@ -47,5 +53,5 @@ ggplot(top10costCROPplot, aes(reorder(EVTYPE, value), value)) +
 
 windows()
 ggplot(top10costplot, aes(reorder(EVTYPE, value), value)) +
-    geom_col(aes(fill = variable)) +
+    geom_col(aes(fill = variable), position = "dodge", stat = "identity") +
     coord_flip()
