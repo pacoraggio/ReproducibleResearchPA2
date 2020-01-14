@@ -11,6 +11,9 @@ output:
 library(lubridate) 
 library(ggplot2) 
 library(dplyr) 
+library(reshape)
+library(knitr)
+library(kableExtra)
 
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -131,6 +134,233 @@ df.wdata$CROPDMGCONV <- sapply(df.wdata$CROPDMGEXP, convert.exp) *
 
 ### Selecting and merging Event Type
 
-The [National Weather Service Storm Data Documentation](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf) document lists $48$ different event type (ref. section 2.1.1 for the Storm Data Event Table and Chapter 7 for event type description) while `EVTYPE` database variable contains `r length(unique(df.wdata$EVTYPE))` different values.  
+The [National Weather Service Storm Data Documentation](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf) document lists $48$ different event type (ref. section 2.1.1 for the Storm Data Event Table and Chapter 7 for event type description) while `EVTYPE` database variable contains `r length(unique(df.wdata$EVTYPE))` different values. The following code reduce the number of unique Event Types. Since the documentation is not perfectly clear and the process is quite tedious, the proposed solution is far to be optimal but gives an idea on how to takle this issue.
 
+```{r eventtype, message=FALSE}
+df.wdata[grep("Marine hail",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Marine Hail"
+df.wdata[grep("Marine High Wind",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Marine High Wind"
+df.wdata[grep("Marine Strong Wind",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Marine Strong Wind"
+df.wdata[grep("Marine Tstm|Marine Thunde",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Marine Thunderstorm Wind"
+df.wdata[grep("Lightn|lighting|LIGNTNING|Lightning",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Lightning"
+df.wdata[grep("Thunderstorm  winds|Tstm w|tstmw|Thunderstormwinds|Thunderstorms w|Thunderstormw|Thunderstom winds|Tunderstom winds",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Thunderstorm Wind"
+df.wdata[grep("THUND|THUNE",
+              df.wdata$EVTYPE, ignore.case = FALSE),]$EVTYPE <- "Thunderstorm"
+df.wdata[grep("Astronomical L",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Astronomical Low Tide"
+df.wdata[grep("Avalanc|Slid",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Avalanche"
+df.wdata[grep("Bliz",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Blizzard"
+df.wdata[grep("Flood|Fld",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Flood"
+df.wdata[grep("Chill",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Cold Wind Chill"
+df.wdata[grep("Freezing Fog",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Freezing Fog"
+df.wdata[grep("FOG",
+              df.wdata$EVTYPE, ignore.case = FALSE),]$EVTYPE <- "Dense Fog"
+df.wdata[grep("Dense Smoke",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Dense Smoke"
+df.wdata[grep("Droug",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Drought"
+df.wdata[grep("Devil",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Dust Devil"
+df.wdata[grep("DUST",
+              df.wdata$EVTYPE, ignore.case = FALSE),]$EVTYPE <- "Dust Storm"
+df.wdata[grep("Heat",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Heat"
+df.wdata[grep("Frost",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Frost"
+df.wdata[grep("Funnel",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Funnel Cloud"
+df.wdata[grep("Heavy Rain|hvy rain|Rainfall|Rainstorm",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Heavy Rain"
+df.wdata[grep("snow",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Snow"
+df.wdata[grep("Surf",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Surf"
+df.wdata[grep("Hurr|Typh",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Hurricane Typhoon"
+df.wdata[grep("Sleet",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Sleet"
+df.wdata[grep("Ice",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Ice"
+df.wdata[grep("Curre",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Rip Current"
+df.wdata[grep("Seiche",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Seiche"
+df.wdata[grep("Storm Surge",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Storm Surge"
+df.wdata[grep("WIND",
+              df.wdata$EVTYPE, ignore.case = FALSE),]$EVTYPE <- "Strong Wind"
+df.wdata[grep("Strong Wind|Strong Winds|Whirlwind|Gusty Winds|Gusty wind|Wind Damage|Gradient wind|gradient wind",
+              df.wdata$EVTYPE, ignore.case = FALSE),]$EVTYPE <- "Strong Wind"
+df.wdata[grep("Torn",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Tornado"
+df.wdata[grep("Tropical dep",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Tropical Depression"
+df.wdata[grep("Tropical sto",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Tropical Storm"
+df.wdata[grep("Tsu",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Tsunami"
+df.wdata[grep("Volcanic",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Volcanic Ash"
+df.wdata[grep("Waterspou",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Waterspout"
+df.wdata[grep("fire",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Wildfire"
+df.wdata[grep("STORM",
+              df.wdata$EVTYPE, ignore.case = FALSE),]$EVTYPE <- "Winterstorm"
+df.wdata[grep("WINTER",
+              df.wdata$EVTYPE, ignore.case = FALSE),]$EVTYPE <- "Winter Weather"
+df.wdata[grep("HAIL",
+              df.wdata$EVTYPE, ignore.case = FALSE),]$EVTYPE <- "Funnel Cloud"
+df.wdata[grep("COLD|HYPO",
+              df.wdata$EVTYPE, ignore.case = FALSE),]$EVTYPE <- "Frost Freeze"
+df.wdata[grep("Freeze|Frost",
+              df.wdata$EVTYPE, ignore.case = TRUE),]$EVTYPE <- "Frost Freeze"
+df.wdata[grep("Frost Freeze|FREEZING RAIN|FREEZING DRIZZLE|Freezing Spray|Freezing Drizzle|Freezing Rain|Freezing drizzle|LIGHT FREEZING RAIN",
+              df.wdata$EVTYPE, ignore.case = FALSE),]$EVTYPE <- "Frost Freeze"
+```
+
+In this way the number of unique Event Type has been reduced to `r length(unique(df.wdata$EVTYPE))`.
+
+## Health and Economical Costs analysis 
+
+The Storm Event Database webpage states that from 1950 to 1995, only a subset of events have been recorded while starting from 1996 all events have been registred. In the present project, in order to compare all data in similar conditions, we consider only data from 1996 onward. 
+
+### Most harmful events 
+
+The following code filter the database by grouping the data by Event Type and then calculating the sum of fatalities and injuries
+
+```{r casualties}
+df.casualties <- df.wdata[df.wdata$YEAR > 1995,] %>% 
+    group_by(EVTYPE) %>%
+    summarise(sum_fatalities = sum(FATALITIES), 
+              sum_injuries = sum(INJURIES)) %>%
+    mutate(total_sum = sum_fatalities + sum_injuries)
+
+head(df.casualties)
+```
+
+The top 10 most harmful events are then extracted.
+
+```{r top10casualties}
+df.top10Harm <- as.data.frame(df.casualties[order(df.casualties$total_sum, 
+                                                  decreasing = TRUE)[1:10], ])
+
+```
+
+### Economical consequences
+
+A similar approach has been used for the Economical consequences. First grouping by Event Type and calculating the sum
+
+```{r econcosts}
+df.cost <- df.wdata[df.wdata$YEAR > 1995,] %>% 
+    group_by(EVTYPE) %>%
+    summarise(cropdmg = sum(CROPDMGCONV), 
+              propdmg = sum(PROPDMGCONV)) %>%
+    mutate(total_sum = cropdmg + propdmg)
+
+knitr::kable(head(df.cost))
+```
     
+And then extracting the top 10 Events
+
+```{r top10costs}
+df.top10cost <- as.data.frame(df.cost[order(df.cost$total_sum, 
+                                            decreasing = TRUE)[1:10], ])
+
+knitr::kable(head(df.top10cost))
+```
+
+## Results
+
+### Most Harmful Events
+
+As for the most harmful events, the following tables shows the top 10 Events that caused more fatalities, injuries and the sum of both of them.
+
+```{r resume, message=FALSE}
+df.top10sumfatalities <- 
+    as.data.frame(df.casualties[order(df.casualties$sum_fatalities, 
+                                                  decreasing = TRUE)[1:10], ])
+
+df.top10suminjuries <- 
+    as.data.frame(df.casualties[order(df.casualties$sum_injuries, 
+                                                  decreasing = TRUE)[1:10], ])
+
+df.top10total <- 
+    as.data.frame(df.casualties[order(df.casualties$total_sum, 
+                                      decreasing = TRUE)[1:10], ])
+
+
+resume <- data.frame('Event Type' = df.top10sumfatalities$EVTYPE,
+                     'Fatalities' = df.top10sumfatalities$sum_fatalities,
+                     'Event Type' = df.top10suminjuries$EVTYPE,
+                     'Injuries' = df.top10suminjuries$sum_injuries,
+                     'Event Type' = df.top10total$EVTYPE,
+                     'Total' = df.top10total$total_sum)
+
+knitr::kable(resume,
+             col.names = c("Event Type", "Fatalities",
+                           "Event Type", "Injuries",
+                           "Event Type", "Total")) %>%
+    kable_styling(bootstrap_options = c("striped", "condensed"), full_width = F)
+```
+
+```{r}
+g1 <- ggplot(df.top10sumfatalities, 
+       aes(reorder(EVTYPE, sum_fatalities), sum_fatalities)) +
+    geom_bar(stat = "identity", position = "dodge", fill = "blue") +
+    coord_flip()
+
+g2 <- ggplot(df.top10suminjuries, 
+             aes(reorder(EVTYPE, sum_injuries), sum_injuries)) +
+    geom_bar(stat = "identity", position = "dodge", fill = "red") +
+    coord_flip()
+
+
+```
+
+
+```{r plot}
+
+df.top10totalplot <- melt(df.top10Harm[,c("EVTYPE", 
+                                         "sum_fatalities",
+                                         "sum_injuries",
+                                         "total_sum")], id.vars = 1)
+ggplot(df.top10totalplot, 
+       aes(reorder(EVTYPE, value), value)) +
+    geom_bar(aes(fill = variable), stat = "identity", position = "dodge") +
+    labs(title = "Top 10 Most Harmful Events (aggregate)",
+         x = "Event Type",
+         y = "Number of Casualties",
+         caption = "Most harmful events by sum of Fatalities and Injuries") +
+    scale_fill_discrete(name = "number of casulaties", labels = c("Fatalities", "Injuries", "Sum")) + 
+    coord_flip()
+```
+
+### Most costly events
+
+In the case of most costly events, we can directly aggregate agricultural and property damages since they are comparable in terms of costs.
+
+```{r}
+top10costplot <- 
+    melt(df.top10cost[,c("EVTYPE", "cropdmg","propdmg", "total_sum")], id.vars = 1)
+
+
+ggplot(top10costplot, aes(reorder(EVTYPE, value), value)) +
+    geom_bar(aes(fill = variable),stat = "identity", position = "dodge") +
+    labs(title = "Top 10 Most Costly Events",
+         x = "Event Type",
+         y = "Costs in US $",
+         caption = "Most economically costly events") +
+    scale_fill_discrete(name = "Costs", labels = c("Agriculture", "Properties", "Total")) + 
+    coord_flip()
+```
