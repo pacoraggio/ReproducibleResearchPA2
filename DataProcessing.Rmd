@@ -314,7 +314,12 @@ knitr::kable(resume,
     kable_styling(bootstrap_options = c("striped", "condensed"), full_width = F)
 ```
 
-```{r}
+
+
+```{r plot}
+
+library("ggpubr")
+
 g1 <- ggplot(df.top10sumfatalities, 
        aes(reorder(EVTYPE, sum_fatalities), sum_fatalities)) +
     geom_bar(stat = "identity", position = "dodge", fill = "blue") +
@@ -326,24 +331,45 @@ g2 <- ggplot(df.top10suminjuries,
     coord_flip()
 
 
-```
-
-
-```{r plot}
-
-df.top10totalplot <- melt(df.top10Harm[,c("EVTYPE", 
+df.top10totalplot <- melt(df.top10total[,c("EVTYPE", 
                                          "sum_fatalities",
                                          "sum_injuries",
                                          "total_sum")], id.vars = 1)
-ggplot(df.top10totalplot, 
-       aes(reorder(EVTYPE, value), value)) +
+# g3 <- ggplot(df.top10totalplot, 
+#        aes(reorder(EVTYPE, value), value)) +
+#     geom_bar(aes(fill = variable), stat = "identity", position = "dodge") +
+#     labs(title = "Top 10 Most Harmful Events (aggregate)",
+#          x = "Event Type",
+#          y = "Number of Casualties",
+#          caption = "Most harmful events by sum of Fatalities and Injuries") +
+#     scale_fill_discrete(name = "number of casulaties", labels = c("Fatalities", "Injuries", "Sum")) + 
+#     coord_flip()
+
+# g3 <- ggplot(df.top10totalplot, 
+#              aes(reorder(EVTYPE, value), value)) +
+#     geom_bar(aes(fill = variable), stat = "identity", position = "dodge") +
+#     labs(title = "Top 10 Most Harmful Events (aggregate)",
+#          x = "Event Type",
+#          y = "Number of Casualties",
+#          caption = "Most harmful events by sum of Fatalities and Injuries") +
+#     scale_fill_discrete(name = "number of casulaties", labels = c("Fatalities", "Injuries", "Sum")) + 
+#     coord_flip() +
+#     theme(legend.position = "right")
+
+g3 <- ggplot(df.top10totalplot, 
+             aes(reorder(EVTYPE, value), value)) +
     geom_bar(aes(fill = variable), stat = "identity", position = "dodge") +
-    labs(title = "Top 10 Most Harmful Events (aggregate)",
-         x = "Event Type",
-         y = "Number of Casualties",
-         caption = "Most harmful events by sum of Fatalities and Injuries") +
+    labs(x = "Event Type",
+         y = "Number of Casualties") +
     scale_fill_discrete(name = "number of casulaties", labels = c("Fatalities", "Injuries", "Sum")) + 
-    coord_flip()
+    coord_flip() +
+    theme(strip.text.x = element_blank(),
+          strip.background = element_rect(colour="white", fill="white"),
+          legend.position=c(.8,.35),
+          legend.key.size = unit(0.1, "cm"))
+
+gridExtra::grid.arrange(g1, g2, g3, nrow = 3)
+
 ```
 
 ### Most costly events
@@ -364,3 +390,4 @@ ggplot(top10costplot, aes(reorder(EVTYPE, value), value)) +
     scale_fill_discrete(name = "Costs", labels = c("Agriculture", "Properties", "Total")) + 
     coord_flip()
 ```
+
