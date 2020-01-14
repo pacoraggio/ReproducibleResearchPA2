@@ -8,11 +8,25 @@ library(dplyr)
 library(ggplot2)
 library(lubridate)
 
-names <- read.csv("./data/repdata_data_StormData.csv/repdata_data_StormData.csv", 
-                  nrows = 10, header = TRUE)
+#  https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2
+
+destfile <- "./Data/repdata_data_StormData.csv.bz2"
+
+if(!file.exists(destfile))
+{
+    dir.create("./Data")
+    destfile <- "./Data/repdata_data_StormData.csv.bz2"
+    urlziplocation <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
+    download.file(urlziplocation, destfile)
+    names <- read.csv(destfile, nrows = 1, header = TRUE)
+}else{
+    names <- read.csv(destfile, nrows = 1, header = TRUE)
+}
+#names <- read.csv("./data/repdata_data_StormData.csv/repdata_data_StormData.csv", 
+#                  nrows = 10, header = TRUE)
 names(names)
 
-df.rawdata <- read.csv("./data/repdata_data_StormData.csv.bz2",
+df.rawdata <- read.csv("./Data/repdata_data_StormData.csv.bz2",
                        colClasses = c("NULL", 
                                       "character", 
                                       rep("NULL",4), 
@@ -38,7 +52,7 @@ df.wdata$YEAR <- year(as.Date(sub(" .*",
                                   df.wdata$BGN_DATE), 
                               format("%m/%d/%Y")))
 
-head(df.wdata)
+# head(df.wdata)
 
 dim(df.rawdata)
 dim(df.wdata)
