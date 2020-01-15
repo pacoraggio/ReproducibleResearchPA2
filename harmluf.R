@@ -66,28 +66,28 @@ resume <- data.frame('Event Type' = df.top10sumfatalities$EVTYPE,
                      'Event Type' = df.top10total$EVTYPE,
                      'Total' = df.top10total$total_sum)
 
-
 g1 <- ggplot(df.top10sumfatalities, 
-             aes(reorder(EVTYPE, sum_fatalities), sum_fatalities)) +
-    geom_bar(stat = "identity", position = "dodge", fill = "blue") +
-    labs(title = "Top 10 Most Harmful Events (aggregate)",
-         x = "Event Type",
-         y = "Number of Casualties",
-         caption = "Most harmful events by sum of Fatalities and Injuries") +
-    
-    coord_flip()
+             aes(reorder(EVTYPE, -sum_fatalities), sum_fatalities)) +
+    geom_bar(stat = "identity", position = "dodge", fill = "salmon") +
+    labs(title = "Sum Fatalities",
+        x = "Event Type",
+         y = "Number of Casualties") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+    #coord_flip()
 
 # g1
 g2 <- ggplot(df.top10suminjuries, 
-             aes(reorder(EVTYPE, sum_injuries), sum_injuries)) +
-    geom_bar(stat = "identity", position = "dodge", fill = "red") +
-    coord_flip() +
-    labs(title = "Top 10 Most Harmful Events (aggregate)",
-         x = "Event Type",
-         y = "Number of Casualties",
-         caption = "Most harmful events by sum of Fatalities and Injuries")
-    
+             aes(reorder(EVTYPE, -sum_injuries), sum_injuries)) +
+    geom_bar(stat = "identity", position = "dodge", fill = "springgreen4") +
+    # coord_flip() +
+    labs(title = "Sum Injuries",
+        x = "Event Type",
+         y = "Number of Casualties") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
+library(grid)
+textG
+# windows()
 # g2
 
 df.top10totalplot <- melt(df.top10total[,c("EVTYPE", 
@@ -96,26 +96,23 @@ df.top10totalplot <- melt(df.top10total[,c("EVTYPE",
                                            "total_sum")], id.vars = 1)
 
 g3 <- ggplot(df.top10totalplot, 
-             aes(reorder(EVTYPE, value), value)) +
+             aes(reorder(EVTYPE, -value), value)) +
     geom_bar(aes(fill = variable), stat = "identity", position = "dodge") +
-    labs(title = "Top 10 Most Harmful Events (aggregate)",
+    labs(title = "aggregate",
          x = "Event Type",
-         y = "Number of Casualties",
-         caption = "Most harmful events by sum of Fatalities and Injuries") +
-    scale_fill_discrete(name = "number of casulaties", labels = c("Fatalities", "Injuries", "Sum")) + 
-    coord_flip() +
+         y = "Number of Casualties") +
+    scale_fill_discrete(name = "", labels = c("Fatalities", "Injuries", "Sum")) + 
+    # coord_flip() +
     theme(strip.text.x = element_blank(),
           strip.background = element_rect(colour="white", fill="white"),
-          legend.position=c(.8,.35))
+          legend.position=c(.7,.85),
+          axis.text.x = element_text(angle = 90, hjust = 1))
     
-
-??legend.key.size
-#windows()
-#g3
+windows()
+g3
 # ggarrange(g1, g2, g3, nrow = 2)
 windows()
-
-gridExtra::grid.arrange(g1, g2, g3, nrow =3)
+gridExtra::grid.arrange(g1, g2, g3, nrow =1)
 
 windows()
 ggplot(df.top10Harmplot, aes(x = reorder(EVTYPE,value), y = value)) +
